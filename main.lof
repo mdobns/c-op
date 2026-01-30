@@ -1,0 +1,31 @@
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {1.1}{\ignorespaces ShopSense project timeline showing the main development phases over a 16-week period.}}{6}{figure.1.1}%
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {2.1}{\ignorespaces Conceptual overview of existing e-commerce platforms and identified gaps targeted by ShopSense.}}{17}{figure.2.1}%
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {3.1}{\ignorespaces High-level architecture of the ShopSense platform showing interactions among the Vue.js frontend, Django backend, relational database, AI services, and payment gateways.}}{25}{figure.3.1}%
+\contentsline {figure}{\numberline {3.2}{\ignorespaces Data flow between the Vue.js frontend, Django REST API, AI components (semantic search, recommendations, chatbot), and the relational database.}}{27}{figure.3.2}%
+\contentsline {figure}{\numberline {3.3}{\ignorespaces Entity--relationship diagram of the ShopSense database schema, including users, products, categories, carts, orders, order items, and coupons.}}{28}{figure.3.3}%
+\contentsline {figure}{\numberline {3.4}{\ignorespaces Simplified Vue.js component structure for the ShopSense frontend.}}{31}{figure.3.4}%
+\contentsline {figure}{\numberline {3.5}{\ignorespaces Architecture of the ShopSense AI chatbot using retrieval-augmented generation with ChromaDB and configurable LLM backends.}}{33}{figure.3.5}%
+\contentsline {figure}{\numberline {3.6}{\ignorespaces Semantic search architecture using sentence transformers and ChromaDB for vector similarity retrieval.}}{34}{figure.3.6}%
+\contentsline {figure}{\numberline {3.7}{\ignorespaces Stripe payment integration flow for card payments in ShopSense.}}{36}{figure.3.7}%
+\contentsline {figure}{\numberline {3.8}{\ignorespaces bKash tokenized checkout integration flow in ShopSense.}}{38}{figure.3.8}%
+\contentsline {figure}{\numberline {3.9}{\ignorespaces Mock payment gateway flow used for development and testing.}}{39}{figure.3.9}%
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {4.1}{\ignorespaces ShopSense homepage with navigation bar, search entry point, and featured products.}}{46}{figure.4.1}%
+\contentsline {figure}{\numberline {4.2}{\ignorespaces Catalog page showing product cards with filtering and sorting options.}}{46}{figure.4.2}%
+\contentsline {figure}{\numberline {4.3}{\ignorespaces Single product detail view with images, description, and purchase actions.}}{47}{figure.4.3}%
+\contentsline {figure}{\numberline {4.4}{\ignorespaces Shopping cart page listing selected items, quantities, subtotal, and coupon input.}}{48}{figure.4.4}%
+\contentsline {figure}{\numberline {4.5}{\ignorespaces Checkout page including address details, payment method choice, and order summary.}}{48}{figure.4.5}%
+\contentsline {figure}{\numberline {4.6}{\ignorespaces Payment methods page showing Stripe card payment integration (other methods selectable from the same flow).}}{49}{figure.4.6}%
+\contentsline {figure}{\numberline {4.7}{\ignorespaces Order success page with confirmation of items, total cost, and payment status.}}{50}{figure.4.7}%
+\contentsline {figure}{\numberline {4.8}{\ignorespaces User profile page showing account details and links to order history.}}{50}{figure.4.8}%
+\contentsline {figure}{\numberline {4.9}{\ignorespaces AI chatbot interface assisting a user with product-related queries.}}{51}{figure.4.9}%
+\contentsline {figure}{\numberline {4.10}{\ignorespaces Search results page showing products retrieved via semantic search.}}{52}{figure.4.10}%
+\contentsline {figure}{\numberline {4.11}{\ignorespaces Product detail page with AI-powered recommendations section.}}{52}{figure.4.11}%
+\contentsline {figure}{\numberline {4.12}{\ignorespaces Django admin dashboard used to manage products, coupons, and orders.}}{53}{figure.4.12}%
+\contentsline {figure}{\numberline {4.13}{\ignorespaces Mobile view of ShopSense showing responsive layout and navigation.}}{54}{figure.4.13}%
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\addvspace {10\p@ }

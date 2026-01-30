@@ -1,0 +1,96 @@
+\documentclass[12pt,a4paper,openright]{report} %twoside
+%-----------------------------------------------------------------
+% LaTeX template for a Bachelor Project Report/Thesis (CSE 400) 
+% of the Department of Computer Science and Engineering  at the 
+% Green University of Bangladesh (GUB)
+
+% Written By: Muhammad Abul Hasan, PhD
+% Date Updated: January 01, 2024 (v1.0)
+% For any comments or suggestions: muhammad.hasan@cse.green.edu.bd
+%-----------------------------------------------------------
+\usepackage{gubcse400}
+\usepackage{gubcse400}
+\usepackage{float}
+\usepackage{tikz}
+\usetikzlibrary{positioning}
+ \usepackage{amsmath} 
+ \usepackage{svg}
+ \usepackage{enumitem}
+
+% Change the name and designation of Chairperson of dept. as required
+\def\HodName{Syed Ahsanul Kabir\xspace}
+\def\HodPosition{Professor and Chairperson of Department of CSE \xspace}
+%s
+%-----------------------------------------------------------
+% Set your report/thesis particulars 
+%-----------------------------------------------------------
+%
+% Use one: Thesis/Project report
+% \def\RoportType{Project \xspace} 
+\def\RoportType{Project report\xspace}
+%
+%
+\def\ReportTitle{ShopSense: Intelligent E‑Commerce Platform\xspace}
+\def\Supervisor{Wahia Tasnim\xspace} 
+\def\SupervisorPosition{Lecturer, Dept. of Artificial Intelligence and Data Science\xspace}
+%
+%
+%\def\reportSubmissionDate{\today}
+\def\reportSubmissionDate{January 30, 2026}
+\def\reportSubmissionTerm{Fall 2025}
+
+
+%-----------------------------------------------------------
+% Set your group members' particulars 
+%-----------------------------------------------------------
+%
+\def\numberOfAuthors{2} % write 1, 2 or 3 (depends on group)
+%
+\def\firstAuthor{Arifa Khatun\xspace} 
+\def\firstAuthorID{213002176\xspace}
+\def\firstAuthorDedication{Dedicated to \\ \textit{my loving Mother}}
+%
+\def\secondAuthor{Md.Sahedur Rahman\xspace} 
+\def\secondAuthorID{213002140\xspace} 
+\def\secondAuthorDedication{To my beloved parents\\ \textit{the source of my inspiration}}
+%
+\def\thirdAuthor{Third Author\xspace} 
+\def\thirdAuthorID{243014003\xspace} 
+\def\thirdAuthorDedication{To ... \\ \textit{xyz} \\ a good soul.}
+%
+%-----------------------------------------------------------
+% Set Board members' particulars 
+%-----------------------------------------------------------
+%
+\def\BoardNumber{10} % board number in which you are going to present your work
+%
+\def\BoardChair{Ms.~Farhana~Akter~Sunny\xspace}
+\def\BoardChairPosition{Assistant Professor\xspace}
+
+\def\BoardMember{Montaser~Abdul~Quader\xspace}
+\def\BoardMemberPosition{Lecturer\xspace}
+
+\def\BoardExternalMember{Md.~Riaz~Uddin\xspace}
+\def\BoardExternalMemberPosition{Assistant Maintenance Engineer\xspace}
+\def\BoardExternalMemberAffiliation{Ministry of Agriculture\xspace}
+
+%
+%-----------------------------------------------------------
+\begin{document}
+\input{./Setup/front}
+%-----------------------------------------------------------
+% Include Chapters 
+%-----------------------------------------------------------
+ \include{./Chapters/chapter1}
+ \include{./Chapters/chapter2}
+ \include{./Chapters/chapter3}
+ \include{./Chapters/chapter4}
+ \include{./Chapters/chapter5}
+% \include{./Chapters/chapter6}
+% \include{./Chapters/chapter7}
+ \input{./Setup/rear} 
+
+%  \coverpage{\numberOfAuthors}
+%-----------------------------------------------------------
+
+\end{document}

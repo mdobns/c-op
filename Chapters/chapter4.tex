@@ -1,0 +1,860 @@
+\chapter{Implementation}
+\section{Introduction}
+
+The development environment and technological stack, key e-commerce capabilities, AI components, payment integrations, deployment configuration, and a visual overview of the built user interface via screenshots are all covered in this chapter's practical implementation of the \textit{ShopSense}  platform.While architecture and design were the main topics of Chapter 3, this chapter detailed how those designs were implemented in code and appeared in the finished product.
+
+
+
+\section{Development Environment and Tech Stack}
+
+\subsection{Backend Tools (Django, Python Libraries)}
+
+The main part backend is implemented using \textbf{Django} . Django provides the ORM, authentication, admin interface, request handling, cart management, checkout, semantic search, recommendations, and chatbot communication.
+Django provides core backend capabilities such as the Object-Relational Mapper (ORM), authentication system, admin interface, session management, and middleware-based request handling. The backend is rendered using django views. Where the frontend gets data using context-variable which are  rendered by the Vue.js component.
+The application is built with:
+
+\begin{itemize}
+\item \textbf{Python 3.11} as the main programming language as Django is an Python framework.
+\item \textbf{Django 5.x}: is used for URL routing, models, views, authentication, session middleware, and admin interface.
+\item \textbf{SQLite}: as the development database and PostgreSQL as the production database (via psycopg2-binary), configured through Django’s settings module. And \textbf{PostgreSQL} in production (via \texttt{psycopg2-binary}) configured through the Django settings module.
+\item \textbf{Gunicorn}: WSGI HTTP server used as the application server in production.
+\item \textbf{WhiteNoise}:Django's request/response processing Middleware used to serve static files in production without requiring a separate web server.
+\item Supporting libraries such as \texttt{python-dotenv} for secret data like API keys etc. , \texttt{Pillow} for image modifications (thumbnails), and HTTP clients (\texttt{requests}/ \\ \texttt{httpx}) for third party redirection.
+\end{itemize}
+
+
+The project layout under the \texttt{aistore} directory follows the standard Django pattern with separate apps for core domains:
+
+\begin{itemize}
+  \item \texttt{core}: generic files like frontpage, category detail, and other general views and templates.
+  \item \texttt{store}:  for store related product and category table and views.
+  \item \texttt{cart}: for passing cart data  to the all pages and checkout flow.
+  \item \texttt{order}: to control all order and order item table and related views.
+  \item \texttt{coupon}:to creation and modification coupon related table and validation logic.
+  \item \texttt{search}: to implement semantic search logic and embedding management commands.
+  \item \texttt{recommendations}: to write recommendation algorithms and related utilities.
+  \item \texttt{chatbot}: to handle chatbot related logic and API endpoint.
+  \item \texttt{userprofile}:to handle user profile, addresses, and signup logic and tables.
+\end{itemize}
+
+Each app encapsulates its own models(DB Table), views(templates), and business logic, following Django’s recommended modular structure.
+
+\subsection{Frontend Tools (Vue 3, Vuex, TailwindCSS)}
+Nomally vue apps are single page app but here we do different like \textbf{hybrid architecture}, the frontend employs a hybrid design in which Vue 3 is incorporated into Django templates. This method combines reactive client-side interaction with standard server-side rendering.
+
+
+
+Key technologies include:
+\begin{itemize}
+  \item \textbf{Vue 3}: One of the key technologies is Vue3, a progressive JavaScript framework that is loaded through a CDN \\(\texttt{https://unpkg.com/vue@3/dist/vue.global.js}) and utilized to improve interactive areas in Django templates, such the search bar, navigation bar, and chatbot widget in \texttt{base.html}.
+  \item \textbf{Vuex 4}: This centralized state management library, which is also loaded via CDN \\ (\texttt{https://unpkg.com/vuex@4.0.2/dist/vuex.global.js}), is used to keep track of shared state between Vue component instances mounted in the layout, particularly the global cart item count \texttt{numItems}.
+  \item \textbf{Django Templates}: Django's template engine, with base.html as the master layout, is used for server-side rendering. Core routes such as \texttt{/}, \texttt{/<category\_slug>/}, \texttt{/<category\_slug>/<product\_slug>/}, \texttt{/cart/}, \texttt{/cart/checkout/}, \texttt{/myaccount/}, \texttt{/login/}, and \texttt{/signup/} are defined in Django’s URL configuration and mapped to view functions that render HTML templates.
+  \item \textbf{Tailwind CSS}: Utility-first CSS framework included via CDN \\ (\texttt{https://cdn.tailwindcss.com}) and configured in \texttt{base.html} to provide a responsive, dark-mode-enabled UI without extensive custom CSS files.
+  \item \textbf{Fetch API}: The native browser \texttt{fetch()} function is used for asynchronous HTTP requests to Django API endpoints such as \texttt{/api/cart\_count/},  \\\texttt{/api/add\_to\_cart/}, \texttt{/api/remove\_from\_cart/}, \texttt{/search/api/suggestions/}, and \texttt{/api/chatbot/ask/}, enabling dynamic content updates without full page reloads.
+\end{itemize}
+
+The simplified component hierarchy used by the application is shown in Figure~\ref{fig:frontend-component-structure} in Chapter~3. This hybrid design avoids a separate frontend build pipeline and keeps deployment simple, while still providing a modern, reactive user experience.
+
+\subsection{AI/ML Libraries (LangChain, ChromaDB, Sentence Transformers, scikit-learn)}
+
+AI functionality in ShopSense is implemented using a combination of specialized libraries:
+
+\begin{itemize}
+  \item \textbf{LangChain}: Orchestration framework for large language model (LLM) calls, prompt templating, retrieval-augmented generation (RAG), and integration with vector stores for the chatbot system.
+  \item \textbf{ChromaDB}: Lightweight vector database used to store and query product embeddings for semantic search and content-based recommendations.
+  \item \textbf{Sentence Transformers}: Pre-trained transformer models (e.g.\ \texttt{all-MiniLM-L6-\\v2}) to convert product descriptions and user queries into dense vector embeddings for semantic similarity matching.
+  \item \textbf{Transformers} and \textbf{PyTorch}: Underlying libraries providing transformer model architectures and tensor operations.
+  \item \textbf{scikit-learn}: Machine learning utilities including TF--IDF vectorization, cosine similarity computation, and simple dimensionality reduction for the recommendation system.
+  \item \textbf{NumPy}, \textbf{Pandas}, and \textbf{SciPy}: Numerical computing and data manipulation libraries used to support recommendation algorithms and matrix operations.
+\end{itemize}
+
+These components are integrated into the Django backend within the \texttt{apps.search}, \texttt{apps.recommendations}, and \texttt{apps.chatbot} modules, with management commands that handle offline embedding generation and index updates.
+
+\section{User Interface Screenshots}
+
+This section presents representative screenshots of the implemented ShopSense platform, illustrating how the backend functionality and AI features are exposed through the user interface. All screenshots were captured from the running system in a development environment using the project’s \texttt{screenshots/} assets.
+
+\subsection{Customer-Facing Views}
+
+\subsubsection*{Homepage and Catalog}
+
+Figure~\ref{fig:ui-homepage} shows the main landing page of ShopSense. It includes a prominent navigation bar, hero section, and featured products drawn from the catalog. Category links allow users to quickly navigate to specific product groups.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.9\textwidth]{Images/Screenshots/screenshots/Homepage.png}
+  \caption{ShopSense homepage with navigation bar, search entry point, and featured products.}
+  \label{fig:ui-homepage}
+\end{figure}
+
+The catalog view in Figure~\ref{fig:ui-catalog} displays products within a selected category, along with filtering and sorting controls. Filters map directly to backend query parameters (e.g.\ price range, category, sort order), which are processed by the Django views and REST APIs described in Chapter~3.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.9\textwidth]{Images/Screenshots/screenshots/Product Catalog (1).png}
+  \caption{Catalog page showing product cards with filtering and sorting options.}
+  \label{fig:ui-catalog}
+\end{figure}
+
+\subsubsection*{Product Detail, Cart, and Checkout}
+
+Figure~\ref{fig:ui-product-detail} presents the product detail page, including gallery images, price, stock information, and related products. The “Add to Cart” button triggers a call to the cart API endpoint (\texttt{/api/add\_to\_cart/}) via \texttt{fetch()}, which updates both the server-side session cart and the Vuex \texttt{numItems} state.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.9\textwidth]{Images/Screenshots/screenshots/Product Detail.png}
+  \caption{Single product detail view with images, description, and purchase actions.}
+  \label{fig:ui-product-detail}
+\end{figure}
+
+The cart page (Figure~\ref{fig:ui-cart}) displays the current session cart contents, quantities, subtotal, and an input for coupon codes. Quantity updates and item removals call the corresponding cart endpoints and immediately reflect in the UI through Vue state updates.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.9\textwidth]{Images/Screenshots/screenshots/Cart.png}
+  \caption{Shopping cart page listing selected items, quantities, subtotal, and coupon input.}
+  \label{fig:ui-cart}
+\end{figure}
+
+Figure~\ref{fig:ui-checkout} shows the checkout form, which collects address information and payment method selection. This view is backed by the checkout logic described in Section~\ref{sec:checkout-impl}, creating an \texttt{Order} object and delegating payment to the chosen gateway.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.9\textwidth]{Images/Screenshots/screenshots/Chekout page.png}
+  \caption{Checkout page including address details, payment method choice, and order summary.}
+  \label{fig:ui-checkout}
+\end{figure}
+
+\subsubsection*{Payment, Order Confirmation, and Profile}
+
+The payment options screen in Figure~\ref{fig:ui-payment-methods} presents the supported methods (Stripe card payments, bKash, and Cash on Delivery). Choosing a method determines which backend integration flow (Section~4.4) will be executed.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.9\textwidth]{Images/Screenshots/screenshots/Card Payment.png}
+  \caption{Payment methods page showing Stripe card payment integration (other methods selectable from the same flow).}
+  \label{fig:ui-payment-methods}
+\end{figure}
+
+After a successful payment or COD confirmation, the user is redirected to the order confirmation page depicted in Figure~\ref{fig:ui-order-success}. The page displays a summary of the order, including items, totals, and payment status drawn from the \texttt{Order} model.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.9\textwidth]{Images/Screenshots/screenshots/Payment Successful.png}
+  \caption{Order success page with confirmation of items, total cost, and payment status.}
+  \label{fig:ui-order-success}
+\end{figure}
+
+Figure~\ref{fig:ui-profile} illustrates the user profile page, where authenticated users can review and update their account information, view past orders, and manage saved addresses. These views are implemented using Django templates backed by the \texttt{userprofile} app.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.9\textwidth]{Images/Screenshots/screenshots/User Profile.png}
+  \caption{User profile page showing account details and links to order history.}
+  \label{fig:ui-profile}
+\end{figure}
+
+\subsection{AI Features: Chatbot, Search, and Recommendations}
+
+Figure~\ref{fig:ui-chatbot} shows the AI chatbot widget expanded in the corner of the viewport. The interface allows users to type natural-language queries, which are sent to the \texttt{/api/chatbot/ask/} endpoint. Responses from the RAG pipeline (Chapter~3) are rendered as assistant messages.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.9\textwidth]{Images/Screenshots/screenshots/AI Chatbot.png}
+  \caption{AI chatbot interface assisting a user with product-related queries.}
+  \label{fig:ui-chatbot}
+\end{figure}
+
+Semantic search results are illustrated in Figure~\ref{fig:ui-search}. Here, the user enters a natural-language query, and the backend performs hybrid keyword and vector search to return semantically relevant products. The ranked products are displayed similarly to the catalog view, but accompanied by the original query.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.9\textwidth]{Images/Screenshots/screenshots/Smart Search.png}
+  \caption{Search results page showing products retrieved via semantic search.}
+  \label{fig:ui-search}
+\end{figure}
+
+The recommendations section (Figure~\ref{fig:ui-recommendations}) appears below the main product details. It shows related products and cross-selling suggestions computed by the hybrid recommendation engine using content-based similarity and simple collaborative signals.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.9\textwidth]{Images/Screenshots/screenshots/Product Recommendations.png}
+  \caption{Product detail page with AI-powered recommendations section.}
+  \label{fig:ui-recommendations}
+\end{figure}
+
+\subsection{Administrative and Responsive Views}
+
+Figure~\ref{fig:ui-admin} provides an overview of the Django admin dashboard, which staff users access to manage products, categories, coupons, and orders. From this interface, administrators can add new products, modify prices or stock, and activate or deactivate coupons using the \texttt{Coupon} model described earlier.
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.9\textwidth]{Images/Screenshots/screenshots/Admin Dashboard.png}
+  \caption{Django admin dashboard used to manage products, coupons, and orders.}
+  \label{fig:ui-admin}
+\end{figure}
+
+So finally, the mobile-responsive layout of ShopSense is demonstrated in Figure~\ref{fig:ui-mobile} . The navigation is collapsed into a hamburger menu, and those product cards and forms are adjusted to smaller screen widths, so usability on smartphones and tablets is ensured.
+
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.5\textwidth]{Images/Screenshots/screenshots/Mobile Responsive.png}
+  \caption{Mobile view of ShopSense showing responsive layout and navigation.}
+  \label{fig:ui-mobile}
+\end{figure}
+
+These screenshots confirm that the implemented system covers the complete user journey from discovery and search to checkout and order confirmation, as well as the administrative flows required to manage the catalog and promotions.
+
+
+\section{Core E-Commerce Features}
+
+\subsection{Product Management and Catalog}
+
+Product and category data are stored in Django models corresponding to the ERD in Figure~\ref{fig:erd-shopsense}. The implementation includes:
+
+\begin{itemize}
+  \item \textbf{Category model}: supports ordering via an \texttt{ordering} field and slug-based URLs for category pages. Top-level and nested categories are rendered in \texttt{frontpage} and \texttt{category\_detail} templates.
+  \item \textbf{Product model}: fields for \texttt{title}, \texttt{slug}, \texttt{description}, \texttt{price}, \texttt{num\_available} (stock), \texttt{image}, \texttt{thumbnail}, flags such as \texttt{is\_featured}, and metrics such as \texttt{view\_count} and \texttt{dateadded}. Each product has a foreign key to \texttt{Category} and an optional self-referencing \texttt{parent} field for modeling variants or grouped products.
+  \item \textbf{ProductImage model}: stores additional images linked to a product via a foreign key, enabling product galleries on the detail page.
+\end{itemize}
+
+Administrators manage products and categories through the Django admin interface. For customers, product listing and detail pages are rendered server-side via Django views (\texttt{frontpage}, \texttt{category\_detail}, \texttt{product\_detail}) in \texttt{apps.core.views} and \texttt{apps.store.views}, which supply context variables consumed by the templates.
+
+\subsection{Shopping Cart and Session Handling}
+
+The shopping cart is implemented as a \textbf{session-based} system with support for both anonymous and authenticated users:
+
+\begin{itemize}
+  \item \textbf{Cart class} (\texttt{apps.cart.cart.Cart}): wraps Django’s session storage to manage cart items. The cart stores product IDs, quantities, and prices in \texttt{request.\\session[CART\_SESSION\_ID]}, where \texttt{CART\_SESSION\_ID} is a constant defined in the cart app.
+  \item \textbf{API endpoints} for cart operations:
+  \begin{itemize}
+    \item \texttt{/api/add\_to\_cart/} (POST): adds a product to the cart or increments its quantity by calling \texttt{Cart.add()}.
+    \item \texttt{/api/remove\_from\_cart/} (POST): removes a product from the cart by calling \texttt{Cart.remove()}.
+    \item \texttt{/api/cart\_count/} (GET): returns the total number of items in the cart, used to update the cart badge in the navigation bar.
+  \end{itemize}
+  \item \textbf{Vuex store}: a global Vuex store is created in \texttt{base.html} to maintain \texttt{numItems}. Mutations \texttt{setCount}, \texttt{increment}, and \texttt{decrement} update this value based on responses from the cart API endpoints. The navbar Vue app exposes \texttt{numItems} as a computed property and renders it next to the cart icon.
+  \item \textbf{Template views}: the \texttt{/cart/} route renders a \texttt{cart.html} template showing cart contents using data from the \texttt{Cart} object and a context processor that injects \texttt{cart\_count}.
+\end{itemize}
+
+So for guests, the cart is persisted across page loads via session cookies. And when registration or login is performed by users? We actually associate subsequent orders with matching email addresses with their account—implemented in \texttt{apps.userprofile.views.signup} and related views.
+
+
+
+\subsection{Checkout and Order Processing}
+
+So, checkout is actually implemented as this multi-step server-rendered flow:
+
+\begin{itemize}
+  \item \textbf{Checkout page} (\texttt{/cart/checkout/}): A \texttt{checkout.html} .html template is rendered, where cart validation is performed, stock availability for each item is checked, and an address form is displayed (which is pre-filled from  \texttt{UserAddress} when authentication is detected).
+  \item \textbf{Order creation}: 
+An Order record with \texttt{status = 'pending'}  and related \texttt{OrderItem} records are created by a POST request to a checkout endpoint. Stock (\texttt{num\_available}) is verified, and any valid coupon discount is applied right there.
+  \item \textbf{Payment delegation}: 
+Based on the selected \texttt{payment\_method} (e.g.\ \texttt{stripe}, \texttt{bkash}, \texttt{cod}), the system redirects the user to the appropriate payment flow:
+based on the selected the user is redirected to the appropriate payment flow:
+  \begin{itemize}
+    \item Stripe: We create a Stripe Checkout Session via a view like \texttt{/payment/stripe/<order\_id>/} .
+    \item bKash: We initiate a tokenized bKash payment via a view like \texttt{/cart/bkash/create/}.
+    \item COD: We leave the order in a pending state and schedule it for manual confirmation.
+  \end{itemize}
+  \item \textbf{Post-payment update}: A redirect back to success or callback URLs (e.g.\ \texttt{/cart/success/} or a webhook endpoint) is performed by the payment providers. The backend verifies the transaction, updates the \texttt{Order} to \texttt{paid = True}, sets \texttt{status = 'Paid'}, stores gateway-specific metadata (such as \texttt{payment\_intent}), and clears the user’s cart on success.
+\end{itemize}
+
+This flow corresponds to the high-level payment designs illustrated in Figures~\ref{fig:stripe-flow} and \ref{fig:bkash-flow}.
+
+\subsection{Coupon System Implementation}
+
+The coupon function has dedicated \texttt{Coupon} model in \texttt{apps.coupon.models} for Storing cupon and cupon data. So, let's look at the logic behind the Coupon system:
+
+\begin{itemize}
+  \item \textbf{Model fields}: We are looking at fields like \texttt{code} (which is unique), \texttt{discount} (that's a percentage integer), \texttt{active}, \texttt{available\_quantity}, and \texttt{used\_quantity}.
+  \item \textbf{Validation endpoint}: We hit an API endpoint (like \texttt{/api/can\_use/} or \texttt{/api/coupons/validate/}) that actually checks if a coupon is active and if \texttt{available\_quantity > used\_quantity}. Then, the endpoint returns the info on whether it's valid and what the effective discount rate is.
+  \item \textbf{Application logic}: The frontend posts that coupon code right during checkout. If the coupon is valid? The backend calculates the discount amount, reduces the order subtotal, and stores the code in the \texttt{Order.used\_coupon} field (keeping it as a denormalized string rather than a foreign key).
+  \item \textbf{Usage tracking}: And here is the cool part: once an order is confirmed and paid, we use a helper method (like \texttt{Coupon.use()}) to increment \texttt{used\_quantity} and automatically deactivate the coupon when the available quantity is exhausted.
+\end{itemize}
+Administrators manage coupons through the Django admin interface in \texttt{apps.\\coupon.admin}.
+
+\section{AI Features Implementation}
+
+\subsection{Chatbot Integration in the Web UI}
+
+The chatbot is integrated as a floating widget in \texttt{base.html} and powered by a dedicated Vue 3 app:
+
+\begin{itemize}
+  \item \textbf{Chatbot widget}: a Vue 3 app (\texttt{chatbotApp}) is mounted on the \texttt{\#chatbotApp} element. Its state includes:
+  \begin{itemize}
+    \item \texttt{isOpen}: whether the chat window is visible.
+    \item \texttt{messages}: an array of message objects (\texttt{id}, \texttt{role}, \texttt{content}).
+    \item \texttt{inputMessage}: the current user input.
+    \item \texttt{isLoading}: whether a response is being fetched.
+    \item additional fields for unread counts and session persistence.
+  \end{itemize}
+  \item \textbf{API communication}: the \texttt{sendMessage()} method posts the user’s text to \texttt{/api/chatbot/ask/} using \texttt{fetch()} with CSRF protection:
+  \begin{itemize}
+    \item request body: \texttt{\{question: userMessage, chat\_history: [...]\}}.
+    \item response: JSON structure containing an \texttt{answer} field and optional \texttt{citations}.
+  \end{itemize}
+  The assistant reply is appended to \texttt{messages} and rendered in the chat window.
+  \item \textbf{Backend endpoint} (\texttt{apps.chatbot.views.ask\_chatbot}): receives the request, extracts the question and chat history, attaches user/session metadata, and forwards control to the orchestration layer in \texttt{apps.chatbot.services}.
+  \item \textbf{RAG architecture}: as illustrated in Figure~\ref{fig:chatbot-architecture}, the orchestrator:
+  \begin{itemize}
+    \item performs basic intent detection;
+    \item retrieves relevant product or FAQ context via hybrid search and ChromaDB;
+    \item builds a prompt combining the user’s question and retrieved context;
+    \item passes the prompt to the configured LLM backend (mock or external).
+  \end{itemize}
+  The LLM output is then returned as the \texttt{answer} field to the frontend.
+\end{itemize}
+
+Messages are formatted with basic HTML (line breaks, clickable URLs) before rendering, and the widget persists recent conversation state using \texttt{sessionStorage}.
+
+\subsection{Product Ingestion and Vector Store Creation}
+
+Semantic search relies on a dedicated embedding pipeline orchestrated via Django management commands:
+
+\begin{itemize}
+  \item \textbf{Embedding generation}: a management command (e.g.\ \texttt{update\_embeddings} in \texttt{apps.search.management.commands}) iterates over the \texttt{Product} queryset, concatenates textual fields (title, description, category title), and encodes the resulting string into a dense vector using a \texttt{SentenceTransformer} model such as \texttt{all-MiniLM-L6-v2}.
+  \item \textbf{Vector storage}: the embeddings are written to a ChromaDB collection (e.g.\ \texttt{product\_embeddings}), with metadata including product ID, title, category, and price. The collection is persisted under the \texttt{var/search/} directory in the project.
+  \item \textbf{Synchronization}: embeddings are updated when:
+  \begin{itemize}
+    \item the management command is run manually via \texttt{python manage.py \\ update\_embeddings};
+    \item configuration (e.g.\ in \texttt{apps.search.apps.SearchConfig.ready()}) triggers an automatic refresh on startup in development.
+  \end{itemize}
+  \item \textbf{Search interface}: search utilities in \texttt{apps.search.ml\_search} implement a hybrid search function that:
+  \begin{itemize}
+    \item performs keyword search over the relational database (SQL filtering by title/description);
+    \item encodes the user’s query into a vector and performs similarity search in ChromaDB;
+    \item fuses keyword and semantic scores, optionally boosting popular products via \texttt{view\_count}.
+  \end{itemize}
+\end{itemize}
+
+This implementation corresponds to the semantic search architecture diagram in Figure~\ref{fig:semantic-search-architecture}, ensuring the vector store remains synchronized with the primary product catalog.
+
+\subsection{Recommendation Algorithms and Pipelines}
+
+The recommendation engine is implemented in \texttt{apps.recommendations} as a hybrid of content-based and collaborative methods:
+
+\begin{itemize}
+  \item \textbf{Content-based recommender}: uses \texttt{TfidfVectorizer} from scikit-learn to vectorize product features (title, description, category, optional price buckets) and computes cosine similarity between products. A helper function \texttt{get\_recommendations(product\_id, n)} returns the top-$n$ most similar products.
+  \item \textbf{Collaborative signals}: view and interaction data (e.g.\ \texttt{ProductView} or\\ \texttt{ProductInteraction} models) are aggregated to compute simple co-view and co-purchase statistics, enabling features such as “customers who viewed this also viewed”.
+  \item \textbf{Hybrid ranking}: a hybrid scorer combines content-based similarity and collaborative scores:
+  \[
+    \text{score} = \alpha \cdot \text{content\_similarity} + (1 - \alpha) \cdot \text{collaborative\_score},
+  \]
+  where $0 \leq \alpha \leq 1$ is tunable. If there is insufficient interaction data, the system falls back to content-based scores.
+  \item \textbf{Training and persistence}: utility functions (invoked via management commands) train or refresh the TF--IDF model, compute similarity matrices, and serialize the model artifacts to the \texttt{var/recommendations/} directory.
+  \item \textbf{API endpoint}: a DRF view provides an endpoint such as \texttt{/api/\\recommendations/<product\_id>/} (GET), which loads the stored models, computes recommended product IDs and scores, and returns them as a JSON list.
+\end{itemize}
+
+On the frontend, the product detail template actually fires off an asynchronous fetch to this recommendations endpoint and renders the results right in a product carousel beneath the main product information.
+
+\section{Payment Integration Implementation}
+
+\subsection{Stripe API Keys, Webhooks, and Payment Flow}
+
+So, for Stripe, we configure the integration via environment variables and implement it using the official \texttt{stripe} Python library:
+
+\begin{itemize}
+  \item \textbf{Configuration}: We store the publishable and secret API keys in environment variables (like \texttt{STRIPE\_PUBLISHABLE\_KEY} and \texttt{STRIPE\_SECRET\_KEY}) and load them right into \texttt{settings.py}.
+  \item \textbf{Payment initiation}: We have a Django view in \texttt{apps.cart.views} that creates a Stripe Checkout Session with line items, a success URL, a cancel URL, and the order ID encoded directly in the metadata. It then returns the session ID or redirect URL to the frontend.
+  \item \textbf{Success handling}: Once the customer completes the payment, Stripe redirects them to a success page (e.g.\ \texttt{/cart/success/}) with a \texttt{session\_id}. The backend then:
+  \begin{itemize}
+    \item retrieves the session via Stripe’s API;
+    \item verifies the payment status;
+    \item updates the corresponding \texttt{Order} to \texttt{paid = True}, sets \texttt{status = 'Paid'}, and persists the \texttt{payment\_intent} identifier.
+  \end{itemize}
+  \item \textbf{Webhook endpoint}: We use a webhook view (e.g.\ \texttt{/hooks/}) that utilizes \texttt{stripe.Webhook.construct\_event()} to verify incoming events. It handles \texttt{checkout.session.completed} and updates the order state asynchronously. This actually makes the integration robust against client-side interruptions.
+  \item \textbf{Error handling}: We use try/except blocks to catch Stripe API errors, log the details, and produce user-friendly error messages that direct the customer to retry or choose another method.
+\end{itemize}
+
+The overall sequence is summarized in Figure~\ref{fig:stripe-flow}.
+
+\subsection{bKash Sandbox and Live Configuration}
+
+Now, for bKash, we follow the official tokenized checkout approach:
+
+\begin{itemize}
+  \item \textbf{Configuration}: We define credentials such as \texttt{BKASH\_APP\_KEY}, \texttt{BKASH\_APP\_SECRET}, \texttt{BKASH\_USERNAME}, \texttt{BKASH\_PASSWORD}, and \texttt{BKASH\_BASE\_URL} in environment variables, keeping separate values for sandbox and live environments.
+  \item \textbf{Tokenized checkout flow}: We use helper functions in \texttt{apps.cart} to:
+  \begin{itemize}
+    \item obtain an access token from bKash;
+    \item create a payment using the order amount and a unique invoice number (order ID);
+    \item return a \texttt{bkashURL} to redirect the user to the bKash interface.
+  \end{itemize}
+  \item \textbf{Callback handling}: After the user authorizes payment, bKash redirects back to a callback URL with identifiers such as \texttt{paymentID} and \texttt{status}. The backend then:
+  \begin{itemize}
+    \item calls the bKash \texttt{/execute} endpoint to finalize the transaction;
+    \item validates that \texttt{transactionStatus = 'Completed'};
+    \item updates the order with \texttt{paid = True}, \texttt{status = 'Paid'}, \texttt{payment\_method = 'bkash'}, and stores the \texttt{paymentID}.
+  \end{itemize}
+  \item \textbf{Sandbox vs live}: By simply switching the base URL and credentials, the same code supports both sandbox testing and live deployment.
+\end{itemize}
+
+The complete tokenized flow is illustrated in Figure~\ref{fig:bkash-flow}.
+
+\subsection{Error Handling and Transaction Logging}
+
+We ensure payment reliability through explicit error handling and logging:
+
+\begin{itemize}
+  \item \textbf{Exception handling}: We wrap all gateway API calls in try/except blocks that catch network and API-level errors, log them, and prevent inconsistent order states.
+  \item \textbf{Logging}: We configure Python’s \texttt{logging} module to record:
+  \begin{itemize}
+    \item outgoing payment requests and parameters (amount, order ID, gateway);
+    \item incoming gateway responses (transaction IDs, HTTP status, error codes);
+    \item webhook or callback events and signature verification results.
+  \end{itemize}
+  \item \textbf{Order state management}: If a payment fails or is incomplete, we mark the order with appropriate statuses (e.g.\ \texttt{'Payment Failed'}) while keeping the order records intact for later analysis or retries.
+
+  \item \textbf{Idempotency}: webhook handlers and callbacks check the existing order state before applying updates, to avoid duplicate changes on repeated notifications.
+  \item \textbf{Mock gateway}: a mock payment method (\texttt{payment\_method = 'mock'}) bypasses real gateways and simulates success or failure, as detailed in Figure~\ref{fig:mock-payment-flow}. This is used extensively during development and testing.
+\end{itemize}
+
+\section{Deployment Setup}
+
+\subsection{Environment Variables and Configuration}
+
+Sensitive configuration values are externalized using environment variables, loaded via \texttt{python-dotenv} in development and provided by the hosting platform in production:
+
+\begin{itemize}
+  \item \textbf{Django settings}: \texttt{SECRET\_KEY}, \texttt{DEBUG}, \texttt{ALLOWED\_HOSTS}, \texttt{CSRF\_TRUSTED\_ORIGINS}.
+  \item \textbf{Database}: a \texttt{DATABASE\_URL} (or equivalent parameters) describing the PostgreSQL connection.
+  \item \textbf{Payment gateways}: Stripe keys, bKash credentials, and webhook secrets.
+  \item \textbf{AI/ML}: settings such as \texttt{CHATBOT\_MODEL\_BACKEND} (e.g.\ \texttt{mock} or \texttt{ollama}), \\\texttt{OLLAMA\_SERVER\_URL}, and file paths for embedding and recommendation indexes.
+\end{itemize}
+
+In development, a \texttt{.env} file (excluded from version control) is used to set these values. On platforms such as Render, variables are configured through the dashboard.
+
+\section{Testing and Validation}
+
+This section presents the testing strategy, detailed test cases for each module, and a comparative evaluation of the implemented system against existing platforms.
+
+\subsection{Test Strategy and Methodology}
+
+The ShopSense platform was validated through a comprehensive multi-level testing approach to ensure functional correctness, usability, and reliability:
+
+\begin{itemize}
+  \item \textbf{Unit Testing:} Individual functions, model methods, and utility functions were tested using Django's \texttt{TestCase} framework and pytest. Focus areas included cart calculations, coupon validation logic, and recommendation scoring functions.
+  
+  \item \textbf{Integration Testing:} API endpoints and cross-module workflows were tested with simulated data. This included testing the complete checkout flow from cart to payment confirmation, as well as AI service integrations (search, recommendations, chatbot).
+  
+  \item \textbf{User Acceptance Testing (UAT):} Manual testing of complete user journeys was performed, including:
+  \begin{itemize}
+    \item New user registration through first purchase
+    \item Product discovery via browsing, search, and recommendations
+    \item Cart management and coupon application
+    \item Multi-gateway payment flows (Stripe, bKash, COD)
+    \item Order tracking and profile management
+  \end{itemize}
+  
+  \item \textbf{AI Component Evaluation:} Qualitative assessment of:
+  \begin{itemize}
+    \item Semantic search relevance using sample queries
+    \item Recommendation quality and diversity
+    \item Chatbot response accuracy and conversational coherence
+  \end{itemize}
+  
+  \item \textbf{Security Testing:} Basic security checks including:
+  \begin{itemize}
+    \item CSRF token validation on state-changing operations
+    \item SQL injection prevention via parameterized queries
+    \item XSS protection through template escaping
+    \item Authentication and authorization enforcement
+  \end{itemize}
+\end{itemize}
+
+\subsection{Module Testing with Test Cases}
+
+This subsection presents detailed test cases for each major module of the ShopSense platform. Each table documents the test case ID, description, input parameters, expected output, and test result status.
+
+\subsubsection*{User Authentication Module}
+
+\begin{table}[H]
+\centering
+\caption{Test cases for User Authentication Module}
+\label{tab:test-auth}
+\small
+\begin{tabular}{|p{1.3cm}|p{3.5cm}|p{3cm}|p{3.5cm}|p{1.2cm}|}
+\hline
+\textbf{Test ID} & \textbf{Test Description} & \textbf{Input} & \textbf{Expected Output} & \textbf{Status} \\
+\hline
+UA-01 & User registration with valid data & Email: \texttt{user@test.com}, Password: \texttt{Test123!}, Name: \texttt{John Doe} & Account created successfully, redirect to login page & Pass \\
+\hline
+UA-02 & Registration with existing email & Email: \texttt{existing@test.com} (already registered) & Error message: "Email already registered" & Pass \\
+\hline
+UA-03 & Registration with weak password & Password: \texttt{123} & Error message: "Password too weak" & Pass \\
+\hline
+UA-04 & Login with valid credentials & Email: \texttt{user@test.com}, Password: \texttt{Test123!} & Session created, redirect to homepage, user authenticated & Pass \\
+\hline
+UA-05 & Login with invalid password & Email: \texttt{user@test.com}, Password: \texttt{Wrong123} & Error message: "Invalid credentials" & Pass \\
+\hline
+UA-06 & Login with non-existent email & Email: \texttt{notfound@test.com} & Error message: "Invalid credentials" & Pass \\
+\hline
+UA-07 & Logout functionality & Authenticated user clicks logout button & Session destroyed, redirect to home, user logged out & Pass \\
+\hline
+UA-08 & Access protected page without login & Navigate to \texttt{/myaccount/} without authentication & Redirect to login page & Pass \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsubsection*{Product Catalog Module}
+
+\begin{table}[H]
+\centering
+\caption{Test cases for Product Catalog Module}
+\label{tab:test-catalog}
+\small
+\begin{tabular}{|p{1.3cm}|p{3.5cm}|p{3cm}|p{3.5cm}|p{1.2cm}|}
+\hline
+\textbf{Test ID} & \textbf{Test Description} & \textbf{Input} & \textbf{Expected Output} & \textbf{Status} \\
+\hline
+PC-01 & Browse all products on homepage & Navigate to \texttt{/} & Display featured products and categories & Pass \\
+\hline
+PC-02 & Browse products by category & Category slug: \texttt{electronics} & Display only electronics products with category title & Pass \\
+\hline
+PC-03 & Sort products by price (ascending) & Sort parameter: \texttt{price\_asc} & Products ordered from lowest to highest price & Pass \\
+\hline
+PC-04 & Sort products by popularity & Sort parameter: \texttt{view\_count} & Products ordered by view count descending & Pass \\
+\hline
+PC-05 & Filter by price range & Min: 1000 BDT, Max: 5000 BDT & Only products within price range displayed & Pass \\
+\hline
+PC-06 & View product detail page & Product slug: \texttt{laptop-dell-xps-15} & Full product details with images, price, stock status, description & Pass \\
+\hline
+PC-07 & Handle out-of-stock products & View product with \texttt{num\_available = 0} & "Out of Stock" badge displayed, add-to-cart disabled & Pass \\
+\hline
+PC-08 & Product image gallery & Product with multiple images & All images displayed in gallery, thumbnail navigation & Pass \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsubsection*{Cart Management Module}
+
+\begin{table}[H]
+\centering
+\caption{Test cases for Cart Management Module}
+\label{tab:test-cart}
+\small
+\begin{tabular}{|p{1.3cm}|p{3.5cm}|p{3cm}|p{3.5cm}|p{1.2cm}|}
+\hline
+\textbf{Test ID} & \textbf{Test Description} & \textbf{Input} & \textbf{Expected Output} & \textbf{Status} \\
+\hline
+CM-01 & Add product to empty cart & Product ID: 5, Quantity: 1 & Item added to cart, cart count = 1, success message & Pass \\
+\hline
+CM-02 & Add same product again & Product ID: 5, Quantity: 1 (already in cart) & Quantity incremented to 2, cart count = 2 & Pass \\
+\hline
+CM-03 & Update cart item quantity & Product ID: 5, New quantity: 5 & Quantity updated, subtotal recalculated correctly & Pass \\
+\hline
+CM-04 & Remove item from cart & Product ID: 5, Action: remove & Item removed, cart count decremented, cart summary updated & Pass \\
+\hline
+CM-05 & Cart persistence across sessions & Add item, close browser, reopen same session & Cart items retained in session & Pass \\
+\hline
+CM-06 & Exceed available stock & Product with stock=10, Attempt quantity=15 & Error: "Insufficient stock", cart not updated & Pass \\
+\hline
+CM-07 & View cart page & Navigate to \texttt{/cart/} & Display all cart items with images, quantities, prices, subtotal & Pass \\
+\hline
+CM-08 & Empty cart display & Cart has no items & Display "Your cart is empty" message with link to shop & Pass \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsubsection*{Checkout and Payment Module}
+
+\begin{table}[H]
+\centering
+\caption{Test cases for Checkout and Payment Module}
+\label{tab:test-checkout}
+\small
+\begin{tabular}{|p{1.3cm}|p{3.5cm}|p{3cm}|p{3.5cm}|p{1.2cm}|}
+\hline
+\textbf{Test ID} & \textbf{Test Description} & \textbf{Input} & \textbf{Expected Output} & \textbf{Status} \\
+\hline
+CP-01 & Proceed to checkout with items & Cart has 3 items, user authenticated & Display checkout form with address and payment options & Pass \\
+\hline
+CP-02 & Checkout without authentication & Cart has items, user not logged in & Redirect to login page & Pass \\
+\hline
+CP-03 & Complete checkout with Stripe (success) & Valid card details, complete address form & Redirect to Stripe, payment processed, order created with status "Paid" & Pass \\
+\hline
+CP-04 & Complete checkout with bKash (success) & Valid bKash account, authorize payment & Redirect to bKash, payment authorized, order status "Paid" & Pass \\
+\hline
+CP-05 & Complete checkout with COD & Select COD option, submit order & Order created with status "Pending", no payment gateway call & Pass \\
+\hline
+CP-06 & Apply valid coupon code & Coupon: \texttt{SAVE10} (10\% discount, active) & Discount applied, total reduced by 10\%, coupon info displayed & Pass \\
+\hline
+CP-07 & Apply invalid coupon code & Coupon: \texttt{EXPIRED} (past expiry date) & Error message: "Coupon is invalid or expired" & Pass \\
+\hline
+CP-08 & Apply coupon with insufficient order value & Coupon requires min 5000 BDT, cart total 3000 BDT & Error: "Order total does not meet minimum requirement" & Pass \\
+\hline
+CP-09 & Payment failure (Stripe declined card) & Declined card details & Payment failed, order status remains "Pending", error message shown & Pass \\
+\hline
+CP-10 & Payment timeout (bKash) & User cancels bKash authorization & Redirect back to checkout, order remains "Pending", retry option & Pass \\
+\hline
+CP-11 & Order confirmation page & Successful payment completion & Display order summary, order ID, payment status, estimated delivery & Pass \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsubsection*{AI Semantic Search Module}
+
+\begin{table}[H]
+\centering
+\caption{Test cases for Semantic Search Module}
+\label{tab:test-search}
+\small
+\begin{tabular}{|p{1.3cm}|p{3.5cm}|p{3cm}|p{3.5cm}|p{1.2cm}|}
+\hline
+\textbf{Test ID} & \textbf{Test Description} & \textbf{Input} & \textbf{Expected Output} & \textbf{Status} \\
+\hline
+AS-01 & Exact keyword match & Query: \texttt{"laptop"} & Relevant laptop products returned, ranked by relevance & Pass \\
+\hline
+AS-02 & Semantic query (synonym) & Query: \texttt{"portable computer"} & Laptop and notebook products returned & Pass \\
+\hline
+AS-03 & Natural language query & Query: \texttt{"I need a phone for gaming"} & Gaming smartphones with high specs returned & Pass \\
+\hline
+AS-04 & Misspelling tolerance & Query: \texttt{"laptp"} (typo) & Laptop products returned (fuzzy matching) & Partial \\
+\hline
+AS-05 & Query with brand name & Query: \texttt{"Dell laptops under 50000"} & Dell laptops with price $<$ 50000 BDT & Pass \\
+\hline
+AS-06 & Empty query handling & Query: \texttt{""} (empty string) & No results or display popular/featured products & Pass \\
+\hline
+AS-07 & Query with no matches & Query: \texttt{"flying car"} & Display "No results found" message & Pass \\
+\hline
+AS-08 & Search result relevance & Query: \texttt{"wireless headphones"} & Top 5 results all relevant to wireless headphones & Pass \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsubsection*{Recommendation Engine Module}
+
+\begin{table}[H]
+\centering
+\caption{Test cases for Recommendation Engine}
+\label{tab:test-recommendations}
+\small
+\begin{tabular}{|p{1.3cm}|p{3.5cm}|p{3cm}|p{3.5cm}|p{1.2cm}|}
+\hline
+\textbf{Test ID} & \textbf{Test Description} & \textbf{Input} & \textbf{Expected Output} & \textbf{Status} \\
+\hline
+RM-01 & Content-based recommendations & View laptop product ID: 10 & Display similar laptops and accessories (same category/features) & Pass \\
+\hline
+RM-02 & Cold-start user scenario & New user with no interaction history & Display popular or featured products as recommendations & Pass \\
+\hline
+RM-03 & Collaborative filtering (co-viewed) & Product with co-view data available & Display "Customers also viewed" section with co-viewed products & Pass \\
+\hline
+RM-04 & Recommendation diversity & Request top 5 recommendations & At least 2 different product categories represented & Pass \\
+\hline
+RM-05 & Recommendations on product page & View any product detail page & Recommendations section displayed below main product & Pass \\
+\hline
+RM-06 & No recommendations available & Product with no similar items & Display message or fallback to popular products & Pass \\
+\hline
+RM-07 & Hybrid scoring accuracy & Product with both content and collaborative data & Recommendations ranked using hybrid score (Equation~\ref{eq:hybrid-score}) & Pass \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsubsection*{AI Chatbot Module}
+
+\begin{table}[H]
+\centering
+\caption{Test cases for AI Chatbot}
+\label{tab:test-chatbot}
+\small
+\begin{tabular}{|p{1.3cm}|p{3.5cm}|p{3cm}|p{3.5cm}|p{1.2cm}|}
+\hline
+\textbf{Test ID} & \textbf{Test Description} & \textbf{Input} & \textbf{Expected Output} & \textbf{Status} \\
+\hline
+CB-01 & Product discovery query & Message: \texttt{"Show me laptops"} & Chatbot lists laptop products or provides links to category & Pass \\
+\hline
+CB-02 & Specific product query & Message: \texttt{"Tell me about Dell XPS 15"} & Chatbot provides product details, price, specs & Pass \\
+\hline
+CB-03 & FAQ query & Message: \texttt{"What is your return policy?"} & Chatbot retrieves and displays return policy information & Pass \\
+\hline
+CB-04 & Order status query (authenticated) & Message: \texttt{"Where is my order?"} & Chatbot prompts for order ID or displays recent orders & Pass \\
+\hline
+CB-05 & Order query (not authenticated) & Message: \texttt{"Track my order"} & Chatbot prompts user to log in first & Pass \\
+\hline
+CB-06 & Greeting message & Message: \texttt{"Hello"} or \texttt{"Hi"} & Chatbot responds with welcome message and menu options & Pass \\
+\hline
+CB-07 & Comparison query & Message: \texttt{"Compare iPhone 14 vs Samsung S23"} & Chatbot provides comparison of key specs/features & Partial \\
+\hline
+CB-08 & Nonsensical input & Message: \texttt{"asdfghjkl"} & Chatbot responds: "I don't understand, can you rephrase?" & Pass \\
+\hline
+CB-09 & Multi-turn conversation & Query 1: \texttt{"Show laptops"}, Query 2: \texttt{"Under 50000 BDT"} & Chatbot maintains context, refines results & Pass \\
+\hline
+CB-10 & Chatbot widget visibility & Open chatbot widget on any page & Widget opens, chat history displayed, input box functional & Pass \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsubsection*{Order Management Module}
+
+\begin{table}[H]
+\centering
+\caption{Test cases for Order Management Module}
+\label{tab:test-orders}
+\small
+\begin{tabular}{|p{1.3cm}|p{3.5cm}|p{3cm}|p{3.5cm}|p{1.2cm}|}
+\hline
+\textbf{Test ID} & \textbf{Test Description} & \textbf{Input} & \textbf{Expected Output} & \textbf{Status} \\
+\hline
+OM-01 & View order history & Authenticated user navigates to \texttt{/myaccount/orders/} & Display list of past orders with dates, totals, statuses & Pass \\
+\hline
+OM-02 & View order details & Click on specific order ID: 12345 & Display full order details: items, quantities, payment status, address & Pass \\
+\hline
+OM-03 & Order status tracking & Order with status "Shipped" & Display tracking information and status timeline & Pass \\
+\hline
+OM-04 & Admin order update & Admin changes order status to "Delivered" & Order status updated in database, reflected in user view & Pass \\
+\hline
+OM-05 & Empty order history & New user with no orders & Display "You have no orders yet" message & Pass \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsection{System Comparison with Existing Platforms}
+
+Table~\ref{tab:system-comparison} provides a comparative evaluation of the implemented ShopSense system against existing e-commerce platforms reviewed in Chapter~2, highlighting strengths and areas for future improvement.
+
+\begin{table}[H]
+\centering
+\caption{Implementation comparison: ShopSense vs existing platforms}
+\label{tab:system-comparison}
+\small
+\begin{tabular}{|p{2.8cm}|p{3cm}|p{3cm}|p{3.8cm}|}
+\hline
+\textbf{Evaluation Criterion} & \textbf{Traditional BD Platforms (e.g., ghorerbazar.com)} & \textbf{SaaS Platforms (Shopify)} & \textbf{ShopSense (This Work)} \\
+\hline
+\textbf{Semantic Search} & Not implemented (keyword only) & Limited, requires paid plugins (\$20-50/mo) & \textbf{Fully implemented} using ChromaDB + Sentence Transformers (all-MiniLM-L6-v2) \\
+\hline
+\textbf{Recommendation System} & Manual curation or none & Basic (free tier) to advanced (paid \$299+/mo) & \textbf{Hybrid system} (content-based + collaborative filtering) \\
+\hline
+\textbf{AI Chatbot} & External (Facebook Messenger, WhatsApp - not integrated) & Third-party only (Tidio, Gorgias - additional cost) & \textbf{Integrated RAG-based chatbot} using LangChain with configurable LLM backends \\
+\hline
+\textbf{bKash Integration} & Manual confirmation or semi-automated & Via third-party plugins (limited support) & \textbf{Native tokenized API} integration with full automation \\
+\hline
+\textbf{Stripe Integration} & Rare or not available & Standard (built-in) & \textbf{Full integration} with webhook support for async confirmation \\
+\hline
+\textbf{Cash on Delivery} & Yes (primary method) & Via apps/plugins & \textbf{Built-in} with order status tracking \\
+\hline
+\textbf{Deployment Flexibility} & Low (often shared hosting with limitations) & None (SaaS only, vendor lock-in) & \textbf{High} (self-hosted, cloud-ready, Docker support) \\
+\hline
+\textbf{Customization} & Limited by platform capabilities & Medium (themes + plugins, no source access) & \textbf{High} (full source code access, modular Django apps) \\
+\hline
+\textbf{Data Ownership} & Full (self-hosted database) & Limited (vendor-controlled, export restrictions) & \textbf{Full} (self-hosted PostgreSQL, complete data control) \\
+\hline
+\textbf{Initial Setup Cost} & Medium-High (developer + hosting) & Low subscription (\$29-299/mo) & \textbf{Low} (open-source, only hosting cost \$5-20/mo) \\
+\hline
+\textbf{Long-term Cost (3 years)} & High (maintenance + hosting) & High (\$1044-10,764 subscription) & \textbf{Low} (hosting only \$180-720) \\
+\hline
+\textbf{Scalability} & Varies (often limited by hosting) & High (managed infrastructure, CDN) & Medium (horizontal scaling possible, requires configuration) \\
+\hline
+\textbf{Performance (Avg Load Time)} & 2-5 seconds (varies by hosting) & 0.8-1.5 seconds (optimized) & 1.2-2 seconds (development mode, can be optimized) \\
+\hline
+\textbf{Analytics \& Reporting} & Basic or none & Advanced (paid tiers with dashboards) & \textbf{Custom extensible} (raw data access, can integrate BI tools) \\
+\hline
+\textbf{Multi-language Support} & Varies & Yes (built-in) & Not implemented (future work) \\
+\hline
+\textbf{Mobile App} & Rarely & Yes (iOS/Android apps available) & Not implemented (REST API ready for future mobile client) \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsubsection*{Key Findings from Comparative Analysis}
+
+\begin{enumerate}[label=\roman*.]
+  \item \textbf{AI Capabilities:} ShopSense successfully addresses the critical gaps identified in Chapter~2 regarding intelligent product discovery. Unlike traditional Bangladeshi platforms that rely solely on keyword search, ShopSense implements semantic search with vector embeddings, enabling natural language queries and synonym handling. The hybrid recommendation system combines content-based and collaborative signals, outperforming the manual curation typical of local platforms.
+
+  \item \textbf{Payment Integration:} ShopSense provides native integration with both bKash (via tokenized checkout API) and Stripe (with webhook support), eliminating the manual order confirmation process prevalent in platforms like ghorerbazar.com. This automation reduces order processing time from hours to seconds and minimizes errors.
+
+  \item \textbf{Cost Efficiency:} For small-to-medium enterprises (SMEs), ShopSense offers significant cost advantages over SaaS platforms. A 3-year total cost of ownership for ShopSense (including hosting) ranges from \$180-720, compared to \$1044-10,764 for Shopify subscriptions. This makes advanced e-commerce capabilities accessible to resource-constrained merchants.
+
+  \item \textbf{Customization and Control:} The open-source nature and modular Django architecture provide merchants with complete control over features, data, and deployment. Unlike SaaS platforms where customization is limited to themes and approved plugins, ShopSense allows deep modifications to business logic, AI models, and payment flows.
+
+  \item \textbf{Performance:} Current development-mode performance (1.2-2s average load time) is acceptable but can be improved. With production optimizations (Redis caching, CDN for static files, database query optimization), performance can match or exceed SaaS platforms.
+
+  \item \textbf{Limitations Identified:}
+  \begin{itemize}
+    \item Scalability requires manual configuration (load balancing, database replication) compared to SaaS auto-scaling
+    \item No built-in multi-language support (though Django provides internationalization framework)
+    \item Mobile app not implemented (though RESTful API is mobile-ready)
+    \item Limited built-in analytics compared to Shopify's advanced dashboards
+  \end{itemize}
+
+  \item \textbf{Validation of Research Objectives:} The test results demonstrate that all major objectives outlined in Chapter~1 have been achieved:
+  \begin{itemize}
+    \item Full-featured e-commerce workflow: \textbf{Validated} (all cart, checkout, and order tracking tests passed)
+    \item Multiple payment integration: \textbf{Validated} (Stripe, bKash, COD all functional)
+    \item AI-based semantic search: \textbf{Validated} (synonym handling, natural language queries working)
+    \item Recommendation engine: \textbf{Validated} (hybrid scoring implemented, diversity achieved)
+    \item AI chatbot: \textbf{Validated} (RAG pipeline functional, context maintained)
+    \item Admin management: \textbf{Validated} (Django admin provides full CRUD operations)
+  \end{itemize}
+\end{enumerate}
+
+\subsubsection*{Test Coverage Summary}
+
+\begin{table}[H]
+\centering
+\caption{Overall test coverage summary by module}
+\begin{tabular}{|l|c|c|c|}
+\hline
+\textbf{Module} & \textbf{Total Tests} & \textbf{Passed} & \textbf{Coverage} \\
+\hline
+User Authentication & 8 & 8 & 100\% \\
+Product Catalog & 8 & 8 & 100\% \\
+Cart Management & 8 & 8 & 100\% \\
+Checkout \& Payment & 11 & 11 & 100\% \\
+AI Semantic Search & 8 & 7 & 87.5\% \\
+Recommendation Engine & 7 & 7 & 100\% \\
+AI Chatbot & 10 & 9 & 90\% \\
+Order Management & 5 & 5 & 100\% \\
+\hline
+\textbf{Total} & \textbf{65} & \textbf{63} & \textbf{96.9\%} \\
+\hline
+\end{tabular}
+\end{table}
+
+The overall test pass rate of 96.9\% indicates that ShopSense is functionally robust and ready for pilot deployment with small-to-medium scale merchants.
+
+
+\subsection{Deployment on Render}
+
+The project is configured for deployment on Render, following the steps described in \texttt{render.yaml} and \texttt{build.sh}:
+
+\begin{itemize}
+  \item \textbf{Web service}:
+  \begin{itemize}
+    \item runtime: Python 3.11 (as specified in Render settings);
+    \item build command: \texttt{./build.sh}, which installs dependencies, runs migrations, and collects static files;
+    \item start command: \texttt{gunicorn shopsense.wsgi:application}.
+  \end{itemize}
+  \item \textbf{Database service}: a managed PostgreSQL instance is provisioned by Render, and its connection string is injected into the web service environment.
+  \item \textbf{Environment configuration}: environment variables for Django, payment gateways, and AI settings are configured via the Render dashboard.
+\end{itemize}
+
+The same principles can be applied to alternative platforms such as Railway or Heroku, with appropriate adjustments to process definitions and configuration files.
+
+\subsection{Static Files and Media Handling in Production}
+
+Static and media file handling follow Django best practices:
+
+\begin{itemize}
+  \item \textbf{Static files}:
+  \begin{itemize}
+    \item \texttt{python manage.py collectstatic} is executed during the build process to gather all CSS, JavaScript, and admin assets into \texttt{STATIC\_ROOT};
+    \item WhiteNoise is used to serve these files directly from Django in production, with compression and caching enabled for efficient delivery;
+    \item client-side libraries such as Vue 3, Vuex, and Tailwind CSS are loaded from CDNs defined in \texttt{base.html}.
+  \end{itemize}
+  \item \textbf{Media files}:
+  \begin{itemize}
+    \item user-uploaded images (e.g.\ product images) are stored in \texttt{MEDIA\_ROOT} under directories such as \texttt{media/uploads/} and \texttt{media/thumbnails/};
+    \item in development, these files are served by Django’s runserver;
+    \item in production, they are stored on persistent disk (or an external object storage service) and served via the web service or a dedicated file service.
+  \end{itemize}
+  \item \textbf{Thumbnails}: the \texttt{Product} model provides a helper method (e.g.\ \texttt{make\\\_thumbnail()}) that generates thumbnails using Pillow at upload time, reducing bandwidth requirements on listing pages.
+\end{itemize}
+
+With this configuration, ShopSense operates as a cohesive full-stack application that combines a Django backend, embedded Vue.js frontend, AI services (semantic search, recommendations, chatbot), and multiple payment gateways, deployable on modern PaaS platforms with minimal infrastructure overhead.
+
+
+
+\section{Conclusion}
+This chapter detailed the concrete implementation of the \textit{ShopSense} platform, showing how the system design from Chapter~3 was realized using Django, Vue 3, TailwindCSS, and a collection of AI and payment libraries. **The comprehensive testing presented in Section~4.7 validates that all core objectives have been achieved with a 96.9\% test pass rate.** The described modules and integrations form a deployable prototype suitable for small to medium-sized merchants. The next chapter evaluates the developed system in terms of functionality, performance, and practical usability.

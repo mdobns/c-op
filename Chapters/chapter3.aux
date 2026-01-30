@@ -1,0 +1,84 @@
+\relax 
+\providecommand{\transparent@use}[1]{}
+\providecommand\hyper@newdestlabel[2]{}
+\@writefile{toc}{\contentsline {chapter}{\numberline {3}Methodology and System Design}{19}{chapter.3}\protected@file@percent }
+\@writefile{lof}{\addvspace {10\p@ }}
+\@writefile{lot}{\addvspace {10\p@ }}
+\@writefile{toc}{\contentsline {section}{\numberline {3.1}Introduction}{19}{section.3.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {3.2}Software Process Model and Methodology}{19}{section.3.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {3.3}System Requirements}{20}{section.3.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.3.1}Functional Requirements}{20}{subsection.3.3.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.3.2}Non-Functional Requirements (Performance, Security, Usability)}{22}{subsection.3.3.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {3.4}System Design and Architecture}{24}{section.3.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.4.1}High-Level Architecture Diagram (Django + Vue + APIs + DB)}{24}{subsection.3.4.1}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {3.1}{\ignorespaces High-level architecture of the ShopSense platform showing interactions among the Vue.js frontend, Django backend, relational database, AI services, and payment gateways.}}{25}{figure.3.1}\protected@file@percent }
+\newlabel{fig:high-level-architecture}{{3.1}{25}{High-level architecture of the ShopSense platform showing interactions among the Vue.js frontend, Django backend, relational database, AI services, and payment gateways}{figure.3.1}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.4.2}Data Flow Between Frontend, Backend, and AI Services}{25}{subsection.3.4.2}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {3.2}{\ignorespaces Data flow between the Vue.js frontend, Django REST API, AI components (semantic search, recommendations, chatbot), and the relational database.}}{27}{figure.3.2}\protected@file@percent }
+\newlabel{fig:data-flow-frontend-backend-ai}{{3.2}{27}{Data flow between the Vue.js frontend, Django REST API, AI components (semantic search, recommendations, chatbot), and the relational database}{figure.3.2}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {3.5}Backend Design (Django)}{27}{section.3.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.5.1}Database Schema and Models (Products, Users, Orders, Cart, Coupons)}{28}{subsection.3.5.1}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {3.3}{\ignorespaces Entity--relationship diagram of the ShopSense database schema, including users, products, categories, carts, orders, order items, and coupons.}}{28}{figure.3.3}\protected@file@percent }
+\newlabel{fig:erd-shopsense}{{3.3}{28}{Entity--relationship diagram of the ShopSense database schema, including users, products, categories, carts, orders, order items, and coupons}{figure.3.3}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.5.2}REST API Endpoints (Cart API, Product API, Recommendations API, Coupon API)}{29}{subsection.3.5.2}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {3.1}{\ignorespaces Overview of key REST API endpoints in the ShopSense backend.}}{30}{table.3.1}\protected@file@percent }
+\newlabel{tab:api-overview}{{3.1}{30}{Overview of key REST API endpoints in the ShopSense backend}{table.3.1}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {3.6}Frontend Design (Vue.js)}{30}{section.3.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.6.1}Component Structure (Home, Catalog, Product Detail, Cart, Checkout, Profile)}{30}{subsection.3.6.1}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {3.4}{\ignorespaces Simplified Vue.js component structure for the ShopSense frontend.}}{31}{figure.3.4}\protected@file@percent }
+\newlabel{fig:frontend-component-structure}{{3.4}{31}{Simplified Vue.js component structure for the ShopSense frontend}{figure.3.4}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.6.2}State Management (Vuex) and Routing}{31}{subsection.3.6.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {3.7}AI Components}{32}{section.3.7}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.7.1}Chatbot Architecture (LangChain + Ollama/OpenAI + ChromaDB)}{32}{subsection.3.7.1}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {3.5}{\ignorespaces Architecture of the ShopSense AI chatbot using retrieval-augmented generation with ChromaDB and configurable LLM backends.}}{33}{figure.3.5}\protected@file@percent }
+\newlabel{fig:chatbot-architecture}{{3.5}{33}{Architecture of the ShopSense AI chatbot using retrieval-augmented generation with ChromaDB and configurable LLM backends}{figure.3.5}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.7.2}Semantic Search System (Sentence Transformers, Vector Index)}{33}{subsection.3.7.2}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {3.6}{\ignorespaces Semantic search architecture using sentence transformers and ChromaDB for vector similarity retrieval.}}{34}{figure.3.6}\protected@file@percent }
+\newlabel{fig:semantic-search-architecture}{{3.6}{34}{Semantic search architecture using sentence transformers and ChromaDB for vector similarity retrieval}{figure.3.6}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.7.3}Recommendation Engine}{34}{subsection.3.7.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {3.8}Payment System Design}{35}{section.3.8}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.8.1}Stripe Integration Flow}{35}{subsection.3.8.1}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {3.7}{\ignorespaces Stripe payment integration flow for card payments in ShopSense.}}{36}{figure.3.7}\protected@file@percent }
+\newlabel{fig:stripe-flow}{{3.7}{36}{Stripe payment integration flow for card payments in ShopSense}{figure.3.7}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.8.2}bKash Integration Flow (Tokenized Checkout)}{36}{subsection.3.8.2}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {3.8}{\ignorespaces bKash tokenized checkout integration flow in ShopSense.}}{38}{figure.3.8}\protected@file@percent }
+\newlabel{fig:bkash-flow}{{3.8}{38}{bKash tokenized checkout integration flow in ShopSense}{figure.3.8}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.8.3}Mock Payment Gateway for Testing}{38}{subsection.3.8.3}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {3.9}{\ignorespaces Mock payment gateway flow used for development and testing.}}{39}{figure.3.9}\protected@file@percent }
+\newlabel{fig:mock-payment-flow}{{3.9}{39}{Mock payment gateway flow used for development and testing}{figure.3.9}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {3.9}Security and Performance Considerations}{39}{section.3.9}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.9.1}Authentication, Authorization, CSRF}{40}{subsection.3.9.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.9.2}Static File Optimization, Caching, Database Tuning}{40}{subsection.3.9.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {3.10}Conclusion}{41}{section.3.10}\protected@file@percent }
+\@setckpt{./Chapters/chapter3}{
+\setcounter{page}{42}
+\setcounter{equation}{0}
+\setcounter{enumi}{6}
+\setcounter{enumii}{0}
+\setcounter{enumiii}{0}
+\setcounter{enumiv}{0}
+\setcounter{footnote}{0}
+\setcounter{mpfootnote}{0}
+\setcounter{part}{0}
+\setcounter{chapter}{3}
+\setcounter{section}{10}
+\setcounter{subsection}{0}
+\setcounter{subsubsection}{0}
+\setcounter{paragraph}{0}
+\setcounter{subparagraph}{0}
+\setcounter{figure}{9}
+\setcounter{table}{1}
+\setcounter{tcbbreakpart}{0}
+\setcounter{tcblayer}{0}
+\setcounter{tcolorbox@number}{0}
+\setcounter{lstnumber}{1}
+\setcounter{section@level}{0}
+\setcounter{Item}{11}
+\setcounter{Hfootnote}{0}
+\setcounter{bookmark@seq@number}{51}
+\setcounter{float@type}{16}
+\setcounter{parentequation}{0}
+\setcounter{svg@param@lastpage}{0}
+\setcounter{svg@param@currpage}{-1}
+\setcounter{lstlisting}{0}
+}
