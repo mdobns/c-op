@@ -326,57 +326,99 @@ Through this approach:
 Stripe, bKash, and a mock gateway are integrated by the payment subsystem to support the requirements identified in the problem statement. Secure handling of payment data and clear separation between order creation and payment confirmation are emphasized by the design.
 
 \subsection{Stripe Integration Flow}
-The Stripe payments were integrated for getting payment action done. The basic flow is illustrated in Figure~\ref{fig:stripe-flow}:
+
+Stripe was selected as the primary payment gateway for international card payments in ShopSense due to its robust security architecture, comprehensive API ecosystem, and proven track record in e-commerce. As a PCI-DSS Level 1 compliant service provider, Stripe handles all sensitive card data processing, ensuring that ShopSense never stores or directly processes cardholder information on its servers. This significantly reduces the compliance burden and security risks associated with handling payment card data. Furthermore, Stripe's developer-friendly APIs, extensive documentation, and built-in support for various payment methods make it an ideal choice for a modern e-commerce platform targeting international customers.
+
+The Stripe integration in ShopSense follows a secure, tokenized payment flow that separates sensitive payment processing from the application's core business logic. The detailed technical flow is illustrated in Figure~\ref{fig:stripe-flow} and consists of the following steps:
+
 \begin{enumerate}[label=\roman*.]
-  \item The customer selects card payment during checkout and submits the order details to the backend.
-  \item The backend creates a payment intent or checkout session with Stripe, including amount, currency, and metadata (e.g., order ID).
-  \item The frontend redirects the customer to Stripe’s secure payment page or uses Stripe’s client-side components to collect card details.
-  \item Upon completion, Stripe sends a webhook to the backend indicating success or failure.
-  \item The backend verifies the event, updates the order and payment status, and notifies the frontend.
+  \item \textbf{Payment Initiation:} When a customer selects card payment during checkout and submits order details, the backend receives the request and validates the order information (items, quantities, prices, shipping address).
+  
+  \item \textbf{Payment Intent Creation:} The backend creates a PaymentIntent or CheckoutSession via Stripe's REST API (\texttt{/v1/payment\_intents} or \texttt{/v1/checkout/sessions}) with essential parameters including the payment amount, currency (e.g., USD, EUR), order metadata (order ID, customer ID), and success/cancel URLs. The API returns a client secret or session ID.
+  
+  \item \textbf{Secure Card Data Collection:} The frontend redirects the customer to Stripe's hosted checkout page or embeds Stripe Elements (pre-built UI components) to securely collect card details. All card information is transmitted directly to Stripe's servers over TLS, completely bypassing ShopSense's backend to maintain PCI compliance.
+  
+  \item \textbf{Payment Processing and Tokenization:} Stripe processes the payment, performs fraud detection, communicates with the card networks, and tokenizes the card details. The actual card numbers are never exposed to ShopSense.
+  
+  \item \textbf{Webhook Notification:} Upon payment completion (success or failure), Stripe sends an asynchronous webhook event to the backend's designated endpoint (e.g., \texttt{/api/payments/stripe/webhook/}). The webhook payload includes the payment status, transaction ID, and relevant metadata.
+  
+  \item \textbf{Event Verification and Order Update:} The backend verifies the webhook signature using Stripe's SDK to ensure authenticity, extracts the payment status and order information, updates the order and payment records in the database accordingly, and triggers any necessary post-payment workflows (e.g., inventory update, order confirmation email).
+  
+  \item \textbf{User Notification:} Finally, the backend notifies the frontend of the payment outcome, and the customer is redirected to an appropriate success or failure page with order details.
 \end{enumerate}
 
 \begin{figure}[H]
   \centering
   \includegraphics[width=0.9\textwidth]{Images/MyFigs/Stripe Card Payment Flow - ShopSense.png}
-  \caption{Stripe payment integration flow for card payments in ShopSense.}
+  \caption{Comprehensive Stripe payment integration flow showing the secure, tokenized card payment process in ShopSense. The diagram illustrates the separation between the merchant backend and Stripe's PCI-compliant payment processing infrastructure, with webhook-based asynchronous payment confirmation.}
   \label{fig:stripe-flow}
 \end{figure}
 
+The Stripe integration's key security features include end-to-end encryption of payment data, automatic fraud detection powered by Stripe Radar, secure webhook signature verification to prevent tampering, and complete elimination of card data storage on ShopSense servers. This architecture ensures that even in the event of a backend compromise, customer payment information remains secure. Additionally, the asynchronous webhook-based confirmation pattern provides resilience against network failures and ensures reliable payment status updates even if the customer's browser session is interrupted during the payment process. This design aligns with industry best practices and provides a seamless, secure payment experience for international customers while maintaining the highest security standards.
+
 \subsection{bKash Integration Flow (Tokenized Checkout)}
-The bKash integration follows the official tokenized checkout approach suitable for Bangladeshi merchants (Figure~\ref{fig:bkash-flow}):
+
+In Bangladesh, mobile financial services (MFS) have revolutionized digital payments, with bKash being the dominant player serving over 60 million active users. For any e-commerce platform targeting the Bangladeshi market, bKash integration is not optional but essential—it represents the primary payment method for a vast majority of online shoppers who may not have access to traditional banking services or credit cards. bKash's widespread adoption, user familiarity, and trust make it indispensable for reaching the local customer base and ensuring high conversion rates at checkout.
+
+The ShopSense platform integrates bKash using the official Tokenized Checkout API, which provides a secure, merchant-friendly payment flow with enhanced authentication and reduced friction. This integration method is specifically designed for e-commerce platforms and offers several advantages over traditional redirect-based approaches, including better user experience, improved security through tokenization, and seamless integration with the merchant's checkout process. The technical flow is illustrated in Figure~\ref{fig:bkash-flow} and involves the following detailed steps:
 
 \begin{enumerate}[label=\roman*.]
-  \item The customer chooses bKash as the payment method and confirms the order on the checkout page.
-  \item The backend authenticates with the bKash API to obtain an access token if one is not already available.
-  \item The backend initiates a payment request with bKash, which returns a payment URL or token.
-  \item The frontend redirects the customer to the bKash payment interface (web or app), where the customer authorizes the payment.
-  \item bKash redirects back to the merchant callback URL or sends a notification with the payment result.
-  \item The backend verifies the transaction status via the bKash API, updates the order and payment records, and informs the user.
+  \item \textbf{Payment Method Selection:} The customer selects bKash as their preferred payment method on the checkout page and confirms the order details. The frontend sends the order information (amount, items, customer details) to the ShopSense backend.
+  
+  \item \textbf{bKash Authentication:} The backend authenticates with the bKash API by sending merchant credentials (app key, app secret) to the token grant endpoint (\texttt{/tokenized/checkout/token/grant}). bKash returns an access token (valid for 1 hour) that authorizes subsequent API calls.
+  
+  \item \textbf{Payment Initiation and Token Generation:} Using the access token, the backend initiates a payment request by calling the create payment endpoint (\texttt{/tokenized/checkout/create}) with payment details including amount, merchant invoice number, intent (sale/authorization), and callback URLs. bKash generates a unique payment token (bkashURL) and returns it to the backend.
+  
+  \item \textbf{Customer Redirect and Authorization:} The backend sends the bkashURL to the frontend, which redirects the customer to bKash's secure payment interface. The customer can complete the payment via the bKash mobile app (using OTP verification) or web interface (by logging in with their bKash account credentials). This step ensures strong customer authentication and authorization.
+  
+  \item \textbf{Payment Execution and Callback:} After the customer authorizes the payment, bKash processes the transaction and redirects the customer back to the merchant's callback URL with a payment ID. The backend receives this callback notification indicating that payment authorization has occurred.
+  
+  \item \textbf{Payment Verification and Confirmation:} The backend executes the payment by calling the execute payment endpoint (\texttt{/tokenized/checkout/execute}) with the payment ID. This critical step confirms the transaction and ensures that funds are transferred. The backend then queries the payment status endpoint (\texttt{/tokenized/checkout/payment/status}) to verify the final transaction status (Completed, Failed, Cancelled).
+  
+  \item \textbf{Order Update and Customer Notification:} Based on the verified payment status, the backend updates the order and payment records in the database, triggers post-payment workflows (inventory update, order confirmation), and notifies the customer of the successful transaction with order details and payment receipt.
 \end{enumerate}
 
 \begin{figure}[H]
   \centering
   \includegraphics[width=0.9\textwidth]{Images/MyFigs/bKash Tokenized Checkout Flow - ShopSense.png}
-  \caption{bKash checkout flow in ShopSense.}
+  \caption{Comprehensive bKash tokenized checkout flow in ShopSense, illustrating the secure authentication, payment initiation, customer authorization, and verification process for mobile financial service payments in Bangladesh.}
   \label{fig:bkash-flow}
 \end{figure}
 
-\subsection{Mock Payment Gateway for Testing}
-For testing purpose at the start I build a static gateway mimicking bKash sandbox to support development and demonstrations without relying on real payment providers. The mock gateway:
-\begin{itemize}
-  \item Provides some simple endpoints that mimicking the whole process for authorization, success, and failure situations;
-  \item Instant approval or configurable delays/errors are allowed for testing.
-  \item Structured responses similar to real gateways are returned so that the rest of the payment logic can be tested consistently.
-\end{itemize}
+The bKash integration incorporates multiple security layers to protect both customers and the merchant. OAuth 2.0-based authentication ensures secure API access with time-limited tokens, preventing unauthorized payment requests. The tokenized checkout approach means that customer bKash account details are never exposed to the merchant—only payment tokens are exchanged. Additionally, bKash enforces strong customer authentication through OTP verification or secure login, protecting against unauthorized payments. The execute-then-verify pattern (create → authorize → execute → query status) ensures that payments are explicitly confirmed before order fulfillment, preventing issues with partial or ambiguous payment states. This robust integration design makes bKash a reliable and secure payment option for Bangladeshi customers while providing ShopSense with the tools necessary to handle high transaction volumes efficiently. The importance of bKash to ShopSense's success in the local market cannot be overstated—it serves as the bridge between the platform and the millions of Bangladeshi consumers who prefer or exclusively rely on mobile financial services for online transactions.
 
-Figure~\ref{fig:mock-payment-flow} provides an overview of the mock gateway flow.
+\subsection{Mock Payment Gateway for Testing}
+
+In professional software development, especially for payment-critical systems, the ability to develop, test, and debug without relying on live payment providers is essential. A mock payment gateway serves this crucial role in the software development lifecycle (SDLC) by providing a controllable, predictable testing environment that mimics real payment gateway behavior. This approach offers significant advantages: developers can work without requiring production API credentials, QA teams can test edge cases and error scenarios that are difficult to reproduce with live gateways, integration testing can proceed in CI/CD pipelines without external dependencies, and demonstrations can be conducted without processing real transactions or incurring fees.
+
+The mock payment gateway implemented in ShopSense was designed to simulate the complete payment flow of real gateways (particularly bKash and Stripe) while providing developers with fine-grained control over payment outcomes. Rather than being a simple stub that always returns success, the mock gateway is a sophisticated testing tool that replicates the multi-step authentication, payment initiation, authorization, and verification processes of production payment systems. The mock gateway's architecture and flow are illustrated in Figure~\ref{fig:mock-payment-flow}.
+
+The mock payment gateway implementation includes the following key features and capabilities:
+
+\begin{itemize}
+  \item \textbf{API Endpoint Simulation:} The mock gateway exposes RESTful API endpoints that mirror the structure and behavior of real payment providers, including token grant endpoints for authentication (returning mock access tokens), payment creation endpoints (generating mock payment IDs and URLs), payment execution endpoints (simulating transaction processing), and status query endpoints (returning configurable payment states).
+  
+  \item \textbf{Configurable Test Scenarios:} Developers can configure the mock gateway to simulate various payment outcomes and edge cases through environment variables, configuration files, or request parameters. Supported scenarios include successful payments (immediate approval), failed payments (insufficient funds, declined cards, network errors), pending/processing states (for testing asynchronous workflows), timeout scenarios (simulating slow payment provider responses), and partial success cases (authorization succeeds but execution fails).
+  
+  \item \textbf{Realistic Response Structures:} The mock gateway returns JSON responses with the same schema, field names, status codes, and error structures as real payment gateways. This ensures that the application's payment handling logic, error parsing, and data mapping code work identically in development, testing, and production environments.
+  
+  \item \textbf{Consistent Interface Adherence:} The mock gateway implements the same interface and contracts as real payment gateways, allowing the application to use a strategy pattern or dependency injection to swap between mock and production implementations without code changes. This design principle ensures that code tested against the mock gateway will work seamlessly with real gateways.
+  
+  \item \textbf{Webhook Simulation:} For gateways that use webhooks (like Stripe), the mock implementation can trigger webhook callbacks to the application's webhook endpoints, allowing developers to test asynchronous payment confirmation flows, webhook signature verification, and idempotent webhook processing.
+  
+  \item \textbf{Configurable Delays:} The mock gateway can introduce artificial delays to simulate network latency and slow payment processing, enabling developers to test timeout handling, loading states in the UI, and the behavior of asynchronous payment confirmation mechanisms.
+  
+  \item \textbf{Test Data Generation:} The mock generates realistic test data including payment IDs, transaction references, timestamps, and customer identifiers that maintain the format and characteristics of production data, ensuring proper validation and storage logic.
+\end{itemize}
 
 \begin{figure}[H]
   \centering
   \includegraphics[width=0.9\textwidth]{Images/MyFigs/Mock Payment Gateway Flow - ShopSense.png}
-  \caption{Mock payment gateway flow used for development and testing.}
+  \caption{Mock payment gateway flow architecture in ShopSense, demonstrating how the simulated payment system replicates real gateway behavior for development and testing purposes, including configurable success/failure scenarios and realistic API response structures.}
   \label{fig:mock-payment-flow}
 \end{figure}
+
+The benefits of the mock payment gateway extend throughout the development lifecycle. During initial development, it allows rapid iteration and debugging of payment flows without waiting for slow external API responses or dealing with rate limits. For automated testing, it enables deterministic, repeatable tests that can verify both happy paths and error handling without flakiness from external dependencies. In continuous integration environments, the mock gateway allows payment-related tests to run quickly and reliably without requiring network access or production credentials. For demonstrations and training, it provides a safe environment to showcase payment features without processing real transactions. Furthermore, the mock gateway reduces development costs by eliminating test transaction fees and reduces the risk of accidental production charges during development. This comprehensive mock implementation represents a best practice in payment system development, ensuring that ShopSense's payment integration is thoroughly tested and robust before deployment, while maintaining developer productivity and code quality throughout the project lifecycle.
 
 \section{Security and Performance Considerations}
 This section outlines how the system addresses security and performance concerns at a design level.
